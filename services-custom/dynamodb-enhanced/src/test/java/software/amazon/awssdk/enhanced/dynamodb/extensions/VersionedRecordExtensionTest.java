@@ -91,7 +91,7 @@ public class VersionedRecordExtensionTest {
         FakeItem fakeItem = createUniqueFakeItem();
         Map<String, AttributeValue> fakeItemWithInitialVersion =
             new HashMap<>(FakeItem.getTableSchema().itemToMap(fakeItem, true));
-        fakeItemWithInitialVersion.put("version", AttributeValue.builder().n("1").build());
+        fakeItemWithInitialVersion.put("version", AttributeValue.builder().n("0").build());
 
         WriteModification result =
             versionedRecordExtension.beforeWrite(DefaultDynamoDbExtensionContext
@@ -112,7 +112,7 @@ public class VersionedRecordExtensionTest {
         inputMap.put("version", AttributeValue.builder().nul(true).build());
         Map<String, AttributeValue> fakeItemWithInitialVersion =
             new HashMap<>(FakeItem.getTableSchema().itemToMap(fakeItem, true));
-        fakeItemWithInitialVersion.put("version", AttributeValue.builder().n("1").build());
+        fakeItemWithInitialVersion.put("version", AttributeValue.builder().n("0").build());
 
         WriteModification result =
             versionedRecordExtension.beforeWrite(DefaultDynamoDbExtensionContext
@@ -212,7 +212,7 @@ public class VersionedRecordExtensionTest {
                                             .operationContext(PRIMARY_CONTEXT).build());
 
         assertThat(result.additionalConditionalExpression().expression(),
-                   is("attribute_not_exists(#AMZN_MAPPED_version)"));
+                   is("#AMZN_MAPPED_version = :old_version_value"));
     }
 
     @ParameterizedTest
@@ -255,10 +255,10 @@ public class VersionedRecordExtensionTest {
 
     public static Stream<Arguments> customStartAtAndIncrementValues() {
         return Stream.of(
-            Arguments.of(0L,1L,"1"),
-            Arguments.of(3L,2L,"5"),
-            Arguments.of(3L,null,"4"),
-            Arguments.of(null,3L,"3"));
+            Arguments.of(0L,1L,"0"),
+            Arguments.of(3L,2L,"3"),
+            Arguments.of(3L,null,"3"),
+            Arguments.of(null,3L,"0"));
     }
 
     @ParameterizedTest
@@ -321,7 +321,7 @@ public class VersionedRecordExtensionTest {
                                             .operationContext(PRIMARY_CONTEXT).build());
 
         assertThat(result.additionalConditionalExpression().expression(),
-                   is("attribute_not_exists(#AMZN_MAPPED_version)"));
+                   is("#AMZN_MAPPED_version = :old_version_value"));
     }
 
 
@@ -355,7 +355,7 @@ public class VersionedRecordExtensionTest {
         Map<String, AttributeValue> inputMap = new HashMap<>(schema.itemToMap(item, true));
 
         Map<String, AttributeValue> expectedInitialVersion = new HashMap<>(schema.itemToMap(item, true));
-        expectedInitialVersion.put("version", AttributeValue.builder().n("5").build());
+        expectedInitialVersion.put("version", AttributeValue.builder().n("3").build());
 
         WriteModification result =
             recordExtension.beforeWrite(DefaultDynamoDbExtensionContext
@@ -387,7 +387,7 @@ public class VersionedRecordExtensionTest {
         Map<String, AttributeValue> inputMap = new HashMap<>(schema.itemToMap(item, true));
 
         Map<String, AttributeValue> expectedInitialVersion = new HashMap<>(schema.itemToMap(item, true));
-        expectedInitialVersion.put("version", AttributeValue.builder().n("5").build());
+        expectedInitialVersion.put("version", AttributeValue.builder().n("3").build());
 
         WriteModification result =
             recordExtension.beforeWrite(DefaultDynamoDbExtensionContext
@@ -436,7 +436,7 @@ public class VersionedRecordExtensionTest {
         Map<String, AttributeValue> inputMap = new HashMap<>(schema.itemToMap(item, true));
 
         Map<String, AttributeValue> expectedInitialVersion = new HashMap<>(schema.itemToMap(item, true));
-        expectedInitialVersion.put("version", AttributeValue.builder().n("1").build());
+        expectedInitialVersion.put("version", AttributeValue.builder().n("0").build());
 
         WriteModification result =
             recordExtension.beforeWrite(DefaultDynamoDbExtensionContext
@@ -565,7 +565,7 @@ public class VersionedRecordExtensionTest {
         Map<String, AttributeValue> inputMap = new HashMap<>(schema.itemToMap(item, true));
 
         Map<String, AttributeValue> expectedInitialVersion = new HashMap<>(schema.itemToMap(item, true));
-        expectedInitialVersion.put("version", AttributeValue.builder().n("9").build());
+        expectedInitialVersion.put("version", AttributeValue.builder().n("4").build());
 
         WriteModification result =
             recordExtension.beforeWrite(DefaultDynamoDbExtensionContext

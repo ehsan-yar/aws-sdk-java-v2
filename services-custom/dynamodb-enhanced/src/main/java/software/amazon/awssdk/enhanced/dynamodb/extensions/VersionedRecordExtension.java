@@ -158,9 +158,9 @@ public final class VersionedRecordExtension implements DynamoDbEnhancedClientExt
                                                    .orElse(this.incrementBy);
 
 
-        if (isInitialVersion(existingVersionValue, versionStartAtFromAnnotation)) {
+        if (isInitialVersion(existingVersionValue)) {
             newVersionValue = AttributeValue.builder()
-                                            .n(Long.toString(versionStartAtFromAnnotation + versionIncrementByFromAnnotation))
+                                            .n(Long.toString(versionStartAtFromAnnotation))
                                             .build();
             condition = Expression.builder()
                                   .expression(String.format("attribute_not_exists(%s)", attributeKeyRef))
@@ -206,19 +206,9 @@ public final class VersionedRecordExtension implements DynamoDbEnhancedClientExt
                                 .build();
     }
 
-    private boolean isInitialVersion(AttributeValue existingVersionValue, Long versionStartAtFromAnnotation) {
-        if (existingVersionValue == null || isNullAttributeValue(existingVersionValue)) {
-            return true;
-        }
-
-        if (existingVersionValue.n() != null) {
-            long currentVersion = Long.parseLong(existingVersionValue.n());
-            // If annotation value is present, use it, otherwise fall back to the extension's value
-            Long effectiveStartAt = versionStartAtFromAnnotation != null ? versionStartAtFromAnnotation : this.startAt;
-            return currentVersion == effectiveStartAt;
-        }
-
-        return false;
+    private boolean isInitialVersion(AttributeValue existingVersionValue) {
+        // A record is initial ONLY if the version attribute does not exist in DynamoDB
+        return existingVersionValue == null || isNullAttributeValue(existingVersionValue);
     }
 
     @NotThreadSafe
